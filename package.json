@@ -1,0 +1,23 @@
+{
+  "name": "telegram-downtime-notify",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/App.ts",
+    "tsc": "npx tsc ./src/App.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "loglevel": "^1.7.1",
+    "ping": "^0.4.1",
+    "telegraf": "^4.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.1",
+    "@types/ping": "^0.2.1",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.4.3"
+  }
+}
