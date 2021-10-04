@@ -7,6 +7,7 @@ interface Host {
     name: string;
     state: HostState;
     lastStateChange: Date;
+    offlineCounter: number;
 }
 
 enum HostState {
@@ -27,6 +28,7 @@ const botToken = process.env.BOT_TOKEN;
 const chatId = process.env.BOT_CHAT_ID;
 const hosts = initializeHosts(); 
 const delaySeconds = process.env.CHECK_PERIOD ? parseInt(process.env.CHECK_PERIOD) : 5;
+const offlineThreshold = process.env.OFFLINE_THRESHOLD ? parseInt(process.env.OFFLINE_THRESHOLD) : 3;
 
 const bot = new Telegraf(botToken);
 
@@ -66,7 +68,8 @@ function initializeHosts(): Host[] {
     return hostNames.map((hostName) => ({
         name: hostName,
         state: HostState.UNKNOWN,
-        lastStateChange: new Date()
+        lastStateChange: new Date(),
+        offlineCounter: 0
     }));
 }
 
@@ -78,15 +81,31 @@ async function checkHosts() {
 }
 
 async function checkHost(host: Host): Promise<void> {
-    const isOnline = await ping.promise.probe(host.name);
-    const newState = isOnline.alive ? HostState.ONLINE : HostState.OFFLINE;
+    const pingResult = await ping.promise.probe(host.name);
+
+    let newState = host.state;
+
+    if (pingResult.alive) {
+        host.offlineCounter = 0;
+        newState = HostState.ONLINE;
+    } else {
+        host.offlineCounter++;
+        if (host.offlineCounter >= offlineThreshold) {
+            newState = HostState.OFFLINE;
+        } else {
+            log.info(`probe returned offline for ${host.name}, counter: ${host.offlineCounter} / ${offlineThreshold}`)
+        }
+    }
 
     if (newState !== host.state) {
         log.info(`state change: ${host.name} ${host.state} -> ${newState}`);  
 
-        let message = `${getIcon(newState)} *${host.name}* is now *${newState}*.`;
+        let message = `${getIcon(newState)} *${host.name}* is now *${newState}*`;
+        if (newState === HostState.OFFLINE) {
+            message += ` after ${offlineThreshold} failed probes`
+        }
         if (host.state !== HostState.UNKNOWN) {
-            message += ` Previously *${host.state}* since ${host.lastStateChange.toLocaleString()}.`;
+            message += `. Previously *${host.state}* since ${host.lastStateChange.toLocaleString()}.`;
         }
 
         sendMessage(message);
