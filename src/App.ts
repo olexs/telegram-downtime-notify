@@ -35,7 +35,11 @@ const bot = new Telegraf(botToken);
 startup();
 
 function sendMessage(message: string) {
-    bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    try {
+        bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    } catch(e: any) {
+        console.error(`error while trying to send Telegram notification:`, e);
+    }
 }
 
 function startup(): void {
@@ -81,11 +85,18 @@ async function checkHosts() {
 }
 
 async function checkHost(host: Host): Promise<void> {
-    const pingResult = await ping.promise.probe(host.name);
+    var isAlive = true;
+    try {
+        const pingResult = await ping.promise.probe(host.name);
+        isAlive = pingResult.alive;
+    } catch(e: any) {
+        log.error(`probe error for ${host.name}:`, e);
+        isAlive = false;
+    }
 
     let newState = host.state;
 
-    if (pingResult.alive) {
+    if (isAlive) {
         host.offlineCounter = 0;
         newState = HostState.ONLINE;
     } else {
