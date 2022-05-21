@@ -1,9 +1,8 @@
 FROM node:16.15-alpine
 WORKDIR /app
-COPY package.json package-lock.json .
-RUN npm ci
-COPY .env .
-COPY /src .
-RUN npm run build
-RUN npm ci --production
+COPY package.json package-lock.json .env ./
+COPY src/* ./src/
+RUN npm ci && npm run build && npm ci --production && npm cache clean --force
+ARG NODE_ENV=production
+USER node
 CMD [ "node", "App.js" ]
