@@ -5,4 +5,4 @@ COPY src/* ./src/
 RUN npm ci && npm run build && npm ci --production && npm cache clean --force
 ARG NODE_ENV=production
 USER node
-CMD [ "node", "App.js" ]
+CMD [ "node", "src/App.js" ]
