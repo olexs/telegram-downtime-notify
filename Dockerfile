@@ -1,8 +1,9 @@
-FROM node:alpine
+FROM node:16.15-alpine
 WORKDIR /app
 COPY package.json .
-RUN npm install
+RUN npm ci
 COPY .env .
 COPY /src .
-RUN npx tsc ./App.ts
+RUN npm run build
+RUN npm ci --production
 CMD [ "node", "App.js" ]

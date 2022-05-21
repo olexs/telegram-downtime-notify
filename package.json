@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "ts-node-dev --respawn src/App.ts",
-    "tsc": "npx tsc ./src/App.ts"
+    "build": "npx tsc ./src/App.ts"
   },
   "author": "",
   "license": "ISC",
