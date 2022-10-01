@@ -12,7 +12,7 @@
     "dotenv": "16.0.3",
     "loglevel": "1.8.0",
     "ping": "0.4.2",
-    "telegraf": "4.9.2"
+    "telegraf": "4.10.0"
   },
   "devDependencies": {
     "@types/node": "17.0.23",
