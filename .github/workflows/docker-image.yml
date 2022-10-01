@@ -28,7 +28,7 @@ jobs:
     - name: Setup Node.JS
       uses: actions/setup-node@v3
       with:
-        node-version: '16.x'
+        node-version: '18.x'
         cache: 'npm'
         
     - name: Install dependencies
@@ -38,6 +38,14 @@ jobs:
       run: npm run build
       
     # TODO: Run tests
+    
+    # https://github.com/docker/setup-qemu-action
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    # https://github.com/docker/setup-buildx-action
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v2
       
     # Login against a Docker registry except on PR
     # https://github.com/docker/login-action
@@ -63,6 +71,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
+        platforms: linux/amd64,linux/arm/v7
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
