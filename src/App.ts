@@ -24,25 +24,23 @@ function getIcon(state: HostState): string {
 
 dotenv.config();
 
-const botToken = process.env.BOT_TOKEN;
-const chatId = process.env.BOT_CHAT_ID;
+const botToken = process.env.BOT_TOKEN || "";
+const chatId = process.env.BOT_CHAT_ID || "";
 const hosts = initializeHosts(); 
 const delaySeconds = process.env.CHECK_PERIOD ? parseInt(process.env.CHECK_PERIOD) : 5;
 const offlineThreshold = process.env.OFFLINE_THRESHOLD ? parseInt(process.env.OFFLINE_THRESHOLD) : 3;
+const hostsString = process.env.HOSTS || "localhost";
 
 const bot = new Telegraf(botToken);
 
-startup();
+void startup();
 
-function sendMessage(message: string) {
-    try {
-        bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' });
-    } catch(e: any) {
-        console.error(`error while trying to send Telegram notification:`, e);
-    }
+async function sendMessage(message: string): Promise<void> {
+    await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' })
+        .catch((e: unknown) => console.error(`error while trying to send Telegram notification:`, e));
 }
 
-function startup(): void {
+async function startup(): Promise<void> {
     log.setLevel(process.env.LOG_LEVEL as LogLevelDesc ?? 'WARN');
     log.info("startup");
 
@@ -65,7 +63,7 @@ function shutdown(signal: string) {
 }
 
 function initializeHosts(): Host[] {
-    const hostNames = process.env.HOSTS.split(",");
+    const hostNames = hostsString.split(",");
 
     log.info("initializing hosts", hostNames);
 
@@ -85,18 +83,15 @@ async function checkHosts() {
 }
 
 async function checkHost(host: Host): Promise<void> {
-    var isAlive = true;
-    try {
-        const pingResult = await ping.promise.probe(host.name);
-        isAlive = pingResult.alive;
-    } catch(e: any) {
-        log.error(`probe error for ${host.name}:`, e);
-        isAlive = false;
-    }
+    const { alive } = await ping.promise.probe(host.name)
+        .catch((e: unknown) => {
+            log.error(`probe error for ${host.name}:`, e);
+            return { alive: false };
+        });
 
     let newState = host.state;
 
-    if (isAlive) {
+    if (alive) {
         host.offlineCounter = 0;
         newState = HostState.ONLINE;
     } else {
