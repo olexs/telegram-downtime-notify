@@ -1,8 +1,8 @@
-FROM node:18.16-alpine
+FROM node:18.16.0-alpine
 WORKDIR /app
 COPY package.json package-lock.json .env ./
 COPY src/* ./src/
-RUN npm ci && npm run build && npm ci --production && npm cache clean --force
+RUN npm ci && npm run build && npm ci --omit=dev && npm cache clean --force
 ARG NODE_ENV=production
 USER node
 CMD [ "node", "src/App.js" ]
