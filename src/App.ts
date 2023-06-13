@@ -30,8 +30,10 @@ const delaySeconds = process.env.CHECK_PERIOD ? parseInt(process.env.CHECK_PERIO
 const offlineThreshold = process.env.OFFLINE_THRESHOLD ? parseInt(process.env.OFFLINE_THRESHOLD) : 3;
 const hostsString = process.env.HOSTS || "localhost";
 const hosts = initializeHosts();
+const maxLoops = process.env.TEST_MAX_LOOPS ? parseInt(process.env.TEST_MAX_LOOPS) : 0;
 
 const bot = new Telegraf(botToken);
+let loops = 0;
 
 void startup();
 
@@ -57,9 +59,10 @@ async function startup(): Promise<void> {
 }
 
 async function shutdown(signal: string) {
-    log.info("shutdown");
     await sendMessage("💤 Downtime monitor shutting down.");
+    log.info("shutdown");
     bot.stop(signal);
+    process.exit(0);
 }
 
 function initializeHosts(): Host[] {
@@ -78,8 +81,14 @@ function initializeHosts(): Host[] {
 async function checkHosts() {
     log.debug("checking all hosts");
     await Promise.all(hosts.map(checkHost));
-    setTimeout(() => checkHosts(), delaySeconds * 1000);
-    log.debug("scheduled next check in " + delaySeconds + " seconds");
+
+    if (maxLoops === 0 || ++loops < maxLoops) {
+        setTimeout(() => checkHosts(), delaySeconds * 1000);
+        log.debug("scheduled next check in " + delaySeconds + " seconds");
+    } else {
+        log.info(`TEST_MAX_LOOPS (${maxLoops}) reached, shutting down`);
+        await shutdown('SIGINT');
+    }
 }
 
 async function checkHost(host: Host): Promise<void> {
