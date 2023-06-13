@@ -11,7 +11,7 @@
     },
     {
       "matchPackageNames": ["telegraf"],
-      "allowedVersions": "4.11.2, >4.12.2"
+      "allowedVersions": "<=4.11.2 >4.12.2"
     }
   ]
 }
