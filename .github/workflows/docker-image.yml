@@ -37,7 +37,12 @@ jobs:
     - name: Run TypeScript build
       run: npm run build
       
-    # TODO: Run tests
+    - name: Sanity check
+      env:
+        TEST_MAX_LOOPS: 3
+        CHECK_PERIOD: 3
+        # BOT_TOKEN and _CHAT_ID are in repo secrets
+      run: node ./src/App.js
     
     # https://github.com/docker/setup-qemu-action
     - name: Set up QEMU
