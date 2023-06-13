@@ -26,10 +26,10 @@ dotenv.config();
 
 const botToken = process.env.BOT_TOKEN || "";
 const chatId = process.env.BOT_CHAT_ID || "";
-const hosts = initializeHosts(); 
 const delaySeconds = process.env.CHECK_PERIOD ? parseInt(process.env.CHECK_PERIOD) : 5;
 const offlineThreshold = process.env.OFFLINE_THRESHOLD ? parseInt(process.env.OFFLINE_THRESHOLD) : 3;
 const hostsString = process.env.HOSTS || "localhost";
+const hosts = initializeHosts();
 
 const bot = new Telegraf(botToken);
 
@@ -44,21 +44,21 @@ async function startup(): Promise<void> {
     log.setLevel(process.env.LOG_LEVEL as LogLevelDesc ?? 'WARN');
     log.info("startup");
 
-    bot.launch();
-    sendMessage("⏰ Downtime monitor starting up...");
+    void bot.launch();
+    await sendMessage("⏰ Downtime monitor starting up...");
 
     process.once('SIGINT', () => shutdown('SIGINT'));
     process.once('SIGTERM', () => shutdown('SIGTERM'));
 
     initializeHosts();
-    checkHosts();
+    await checkHosts();
 
     log.debug("startup finished");
 }
 
-function shutdown(signal: string) {
+async function shutdown(signal: string) {
     log.info("shutdown");
-    sendMessage("💤 Downtime monitor shutting down.");
+    await sendMessage("💤 Downtime monitor shutting down.");
     bot.stop(signal);
 }
 
@@ -114,7 +114,7 @@ async function checkHost(host: Host): Promise<void> {
             message += `. Previously *${host.state}* since ${host.lastStateChange.toLocaleString()}.`;
         }
 
-        sendMessage(message);
+        await sendMessage(message);
 
         host.state = newState;
         host.lastStateChange = new Date();
