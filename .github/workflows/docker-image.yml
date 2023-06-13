@@ -41,7 +41,8 @@ jobs:
       env:
         TEST_MAX_LOOPS: 3
         CHECK_PERIOD: 3
-        # BOT_TOKEN and _CHAT_ID are in repo secrets
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        BOT_CHAT_ID: ${{ secrets.BOT_CHAT_ID }}
       run: node ./src/App.js
     
     # https://github.com/docker/setup-qemu-action
