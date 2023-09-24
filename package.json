@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "18.17.17",
-    "@types/ping": "0.4.1",
+    "@types/ping": "0.4.2",
     "ts-node-dev": "2.0.0",
     "typescript": "5.2.2"
   }
