@@ -1,13 +1,15 @@
 {
   "extends": [
     "config:base",
-    ":automergeTypes"
+    ":automergeTypes",
+    ":automergeMinor"
   ],
   "packageRules": [
     {
-      "matchDepTypes": ["devDependency"],
+      "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["patch", "minor"],
-      "automerge": true
+      "automerge": true,
+      "groupName": "dev dependencies"
     },
     {
       "matchPackageNames": ["telegraf"],
