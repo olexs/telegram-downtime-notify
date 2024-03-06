@@ -16,9 +16,9 @@
     "telegraf": "4.11.2"
   },
   "devDependencies": {
-    "@types/node": "20.11.24",
+    "@types/node": "20.11.25",
     "@types/ping": "0.4.4",
     "ts-node-dev": "2.0.0",
-    "typescript": "5.3.3"
+    "typescript": "5.4.2"
   }
 }
